@@ -35,11 +35,12 @@ def example2_3():
 
 
 def updating():
-    # Updating
+    """Shows updating by using the posterior as the next data points prior."""
     sequence = ["W", "W", "L", "W", "L", "W", "L", "W", "W"]
     n_samples = 500
     p = np.linspace(0, 1, n_samples)  # proportion which is water
-    prior = np.array([1] * n_samples)
+    # prior = np.array([1] * n_samples)
+    prior = np.array([1 if i > (n_samples / 2) else 0 for i in range(n_samples)])
     prior = prior / sum(prior)
 
     likelihood_water = binom.pmf(1, 1, p)
