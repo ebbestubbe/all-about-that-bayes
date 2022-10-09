@@ -2,6 +2,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from scipy.stats import binom
+from scipy.stats import norm
+from scipy.stats import uniform
 
 
 def example2_3():
@@ -35,7 +37,7 @@ def example2_3():
 
 
 def updating():
-    """Shows updating by using the posterior as the next data points prior."""
+    """Shows updating by using the posterior as the next data points prior, see fig 2.6"""
     sequence = ["W", "W", "L", "W", "L", "W", "L", "W", "W"]
     n_samples = 500
     p = np.linspace(0, 1, n_samples)  # proportion which is water
@@ -83,8 +85,58 @@ def updating():
     plt.show()
 
 
+def globe_MCMC():
+    """Shows MCMC sampling implementation. Due to bins not being centered etc. the
+    results can be a little skewed, but the idea is clearly shown. See "Overthinking"
+    page 45, R code 4.5 and 4.6
+    """
+    n_samples = 10000
+
+    W = 6
+    L = 3
+    N = W + L
+
+    # Analytical binomial
+    n_grid = 500
+    p_grid = np.linspace(0, 1, n_grid)  # proportion which is water
+    likelihood = binom.pmf(W, N, p_grid)
+    likelihood = likelihood / (sum(likelihood) * (p_grid[1] - p_grid[0]))
+
+    p_samples = [0.5]  # Where to start the sampler.
+    for i in range(1, n_samples):
+        p = p_samples[i - 1]
+        p_delta = norm.rvs(p, 1)
+        p_new = p + p_delta
+        if p_new < 0:
+            p_new = -p_new
+        if p_new > 1:
+            p_new = 2 - p_new
+        # Probability to generate W,L data given p water percentage
+        q0 = binom.pmf(W, N, p)
+        # Probability to generate W,L data given p_new water percentage
+        q1 = binom.pmf(W, N, p_new)
+        # Accept if the new percentage if higher. If not, then accept with probability
+        # proportional to the ratio of their probabilities
+        if uniform.rvs(0, 1) < q1 / q0:
+            p_samples.append(p_new)
+        else:
+            p_samples.append(p)
+
+    fig, ax = plt.subplots(ncols=2)
+
+    ax[0].plot(p_samples)
+    ax[0].set_xlabel("Sample number")
+    ax[0].set_ylabel("Value of p sampled")
+
+    ax[1].hist(p_samples, density=True, bins=100)
+    ax[1].plot(p_grid, likelihood)
+    ax[1].set_xlabel("Value of p")
+    ax[1].set_ylabel("Relative likelihood of p")
+    plt.show()
+
+
 def main():
-    updating()
+    globe_MCMC()
 
 
 if __name__ == "__main__":
