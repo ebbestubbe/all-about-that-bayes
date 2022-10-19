@@ -38,7 +38,11 @@ def example2_3():
 
 def updating():
     """Shows updating by using the posterior as the next data points prior, see fig 2.6"""
-    sequence = ["W", "W", "L", "W", "L", "W", "L", "W", "W"]
+    # sequence = ["W", "W", "L", "W", "L", "W", "L", "W", "W"]
+    # sequence = ["W", "W", "W"]
+    # sequence = ["W", "W", "W", "L"]
+    sequence = ["L", "W", "W", "L", "W", "W", "W"]
+
     n_samples = 500
     p = np.linspace(0, 1, n_samples)  # proportion which is water
     # prior = np.array([1] * n_samples)
@@ -97,7 +101,7 @@ def globe_MCMC():
     N = W + L
 
     # Analytical binomial
-    n_grid = 500
+    n_grid = 100
     p_grid = np.linspace(0, 1, n_grid)  # proportion which is water
     likelihood = binom.pmf(W, N, p_grid)
     likelihood = likelihood / (sum(likelihood) * (p_grid[1] - p_grid[0]))
@@ -128,15 +132,16 @@ def globe_MCMC():
     ax[0].set_xlabel("Sample number")
     ax[0].set_ylabel("Value of p sampled")
 
-    ax[1].hist(p_samples, density=True, bins=100)
-    ax[1].plot(p_grid, likelihood)
+    ax[1].hist(p_samples, density=True, bins=100, label="Histogram of samples")
+    ax[1].plot(p_grid, likelihood, label="Binom probability mass function")
     ax[1].set_xlabel("Value of p")
     ax[1].set_ylabel("Relative likelihood of p")
+    ax[1].legend()
     plt.show()
 
 
 def main():
-    globe_MCMC()
+    updating()
 
 
 if __name__ == "__main__":
